@@ -20,7 +20,7 @@ class OpenRouterClient:
     
     def get_summary_system_prompt(self):
         """獲取總結階段的系統提示詞"""
-        return "你是一個客觀的辯論總結者。請根據提供的完整辯論內容，客觀分析各方論點並總結辯論結果。請使用繁體中文，限 300 字以內。"
+        return "你是一個客觀的辯論總結者。請根據提供的完整辯論內容，客觀分析各方論點並總結辯論結果，最後再給出你覺得這場辯論是哪個立場勝利的結論。請使用繁體中文，限 300 字以內。"
         
     def get_response(self, messages):
         """獲取 AI 回應"""
