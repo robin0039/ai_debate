@@ -4,6 +4,7 @@
 """
 
 import time
+import sys
 
 class DebateSession:
     def __init__(self, openai_client, gemini_client, openrouter_client, show_prompt=False):
@@ -27,6 +28,13 @@ class DebateSession:
         print("🐱 貓派 (GPT-4o-mini)：堅持貓比較聰明")
         print("🐶 狗派 (Gemini 2.5-flash)：主張狗比較聰明")
         print("🤷 懷疑派 (DeepSeek)：認為貓跟狗都很笨")
+        print("=" * 60)
+        
+        if self.show_prompt:
+            print("🔍 Prompt 顯示：已啟用")
+        else:
+            print("🔍 Prompt 顯示：已關閉")
+        print("🚀 Streaming 模式：已啟用")
         print("=" * 60)
         
         # 進行 3 輪辯論
@@ -59,6 +67,9 @@ class DebateSession:
             print("💬 ", end='', flush=True)
             response = client.get_response(messages, stream=True)
             print()  # 換行
+            
+            # 確保輸出完整顯示
+            sys.stdout.flush()
             
             # 儲存到歷史記錄
             self.debate_history.append(f"{name}：{response}")
@@ -130,6 +141,9 @@ class DebateSession:
             print("📝 ", end='', flush=True)
             summary = client.get_response(messages, stream=True)
             print()  # 換行
+            
+            # 確保輸出完整顯示
+            sys.stdout.flush()
             print()
             time.sleep(1)
     
