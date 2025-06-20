@@ -30,6 +30,28 @@ def check_env_keys():
     
     return True
 
+def ask_user_preferences():
+    """詢問使用者偏好設定"""
+    print("🔧 辯論設定")
+    print("-" * 30)
+    
+    # 詢問是否顯示完整 prompt
+    while True:
+        show_prompt = input("是否顯示完整 prompt 內容？ (y/n) [預設: n]: ").strip().lower()
+        if show_prompt in ['y', 'yes', '是', '要']:
+            show_prompt = True
+            break
+        elif show_prompt in ['n', 'no', '否', '不要', '']:
+            show_prompt = False
+            break
+        else:
+            print("請輸入 y 或 n")
+    
+    print()
+    return {
+        'show_prompt': show_prompt
+    }
+
 def main():
     """主程式進入點"""
     # 載入環境變數
@@ -38,6 +60,9 @@ def main():
     # 檢查 API 金鑰
     if not check_env_keys():
         sys.exit(1)
+    
+    # 詢問使用者偏好
+    user_preferences = ask_user_preferences()
     
     try:
         # 初始化 AI 客戶端
@@ -50,7 +75,8 @@ def main():
         debate_session = DebateSession(
             openai_client=openai_client,
             gemini_client=gemini_client, 
-            openrouter_client=openrouter_client
+            openrouter_client=openrouter_client,
+            show_prompt=user_preferences['show_prompt']
         )
         
         # 開始辯論
