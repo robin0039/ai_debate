@@ -6,12 +6,13 @@
 import time
 
 class DebateSession:
-    def __init__(self, openai_client, gemini_client, openrouter_client):
+    def __init__(self, openai_client, gemini_client, openrouter_client, show_prompt=False):
         self.openai_client = openai_client    # 貓派代表
         self.gemini_client = gemini_client    # 狗派代表  
         self.openrouter_client = openrouter_client  # 懷疑派代表
         self.debate_history = []
         self.round_count = 0
+        self.show_prompt = show_prompt
         self.participants = [
             ("🐱 貓派", self.openai_client),
             ("🐶 狗派", self.gemini_client), 
@@ -50,14 +51,17 @@ class DebateSession:
             # 建構訊息
             messages = self._build_messages(client, round_num)
             
-            # 獲取回應
-            response = client.get_response(messages)
+            # 顯示 prompt（如果使用者選擇）
+            if self.show_prompt:
+                self._display_prompt(messages, name)
+            
+            # 獲取回應（使用 streaming）
+            print("💬 ", end='', flush=True)
+            response = client.get_response(messages, stream=True)
+            print()  # 換行
             
             # 儲存到歷史記錄
             self.debate_history.append(f"{name}：{response}")
-            
-            # 顯示回應
-            print(f"💬 {response}")
             print()
             time.sleep(1)
     
@@ -118,8 +122,34 @@ class DebateSession:
                 }
             ]
             
-            # 獲取總結
-            summary = client.get_response(messages)
-            print(f"📝 {summary}")
+            # 顯示 prompt（如果使用者選擇）
+            if self.show_prompt:
+                self._display_prompt(messages, name, is_summary=True)
+            
+            # 獲取總結（使用 streaming）
+            print("📝 ", end='', flush=True)
+            summary = client.get_response(messages, stream=True)
+            print()  # 換行
             print()
             time.sleep(1)
+    
+    def _display_prompt(self, messages, name, is_summary=False):
+        """顯示完整的 prompt 內容"""
+        stage = "總結" if is_summary else "辯論"
+        print(f"\n🔍 {name} {stage}階段 Prompt：")
+        print("=" * 50)
+        
+        for i, msg in enumerate(messages):
+            role_display = {
+                'system': '🤖 系統',
+                'user': '👤 使用者', 
+                'assistant': '🤝 助手'
+            }.get(msg['role'], msg['role'])
+            
+            print(f"{role_display}：")
+            print(f"{msg['content']}")
+            if i < len(messages) - 1:
+                print("-" * 30)
+        
+        print("=" * 50)
+        print()
