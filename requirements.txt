@@ -1,0 +1,13 @@
+# AI 辯論 Demo 依賴套件
+
+# OpenAI API 客戶端
+openai>=1.0.0
+
+# Google Gemini API 客戶端
+google-generativeai>=0.3.0
+
+# HTTP 請求 (用於 OpenRouter)
+requests>=2.31.0
+
+# 環境變數管理
+python-dotenv>=1.0.0
