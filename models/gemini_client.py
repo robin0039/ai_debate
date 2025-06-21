@@ -1,5 +1,5 @@
 """
-Google Gemini 2.0-flash 客戶端
+Google Gemini 2.5-flash-preview-04-17 客戶端
 代表立場：狗比較聰明
 """
 
@@ -11,7 +11,7 @@ class GeminiClient:
     def __init__(self, api_key=None):
         self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
         self.stance = "狗比較聰明"
-        self.model = "gemini-2.0-flash"
+        self.model = "gemini-2.5-flash-preview-04-17"
         
         # 初始化 OpenAI 客戶端，使用 Gemini 的 OpenAI 相容端點
         self.client = openai.OpenAI(
