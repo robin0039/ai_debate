@@ -12,7 +12,7 @@ class OpenRouterClient:
     def __init__(self, api_key=None):
         self.api_key = api_key or os.getenv('OPENROUTER_API_KEY')
         self.stance = "貓跟狗都很笨"
-        self.model = "deepseek/deepseek-chat"
+        self.model = "deepseek/deepseek-chat-v3-0324:free"
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
         
     def get_system_prompt(self):

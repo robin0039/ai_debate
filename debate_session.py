@@ -27,7 +27,7 @@ class DebateSession:
         print("📋 參與者：")
         print("🐱 貓派 (GPT-4o-mini)：堅持貓比較聰明")
         print("🐶 狗派 (Gemini 2.5-flash)：主張狗比較聰明")
-        print("🤷 懷疑派 (DeepSeek)：認為貓跟狗都很笨")
+        print("🤷 懷疑派 (deepseek-chat-v3-0324:free)：認為貓跟狗都很笨")
         print("=" * 60)
         
         if self.show_prompt:
