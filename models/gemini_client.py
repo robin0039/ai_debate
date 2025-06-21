@@ -40,7 +40,7 @@ class GeminiClient:
             response = self.model.generate_content(
                 full_prompt,
                 generation_config=genai.types.GenerationConfig(
-                    max_output_tokens=200,
+                    max_output_tokens=2000,
                     temperature=0.7
                 ),
                 stream=stream

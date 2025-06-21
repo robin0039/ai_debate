@@ -28,7 +28,7 @@ class OpenAIClient:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                max_tokens=200,
+                max_tokens=2000,
                 temperature=0.7,
                 stream=stream
             )
