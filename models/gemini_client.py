@@ -1,18 +1,23 @@
 """
-Google Gemini 2.5-flash 客戶端
+Google Gemini 2.0-flash 客戶端
 代表立場：狗比較聰明
 """
 
-import google.generativeai as genai
+import openai
 import os
 import sys
 
 class GeminiClient:
     def __init__(self, api_key=None):
         self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
         self.stance = "狗比較聰明"
+        self.model = "gemini-2.0-flash"
+        
+        # 初始化 OpenAI 客戶端，使用 Gemini 的 OpenAI 相容端點
+        self.client = openai.OpenAI(
+            base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            api_key=self.api_key
+        )
         
     def get_system_prompt(self):
         """獲取系統提示詞"""
@@ -25,24 +30,11 @@ class GeminiClient:
     def get_response(self, messages, stream=False):
         """獲取 AI 回應"""
         try:
-            # 將 OpenAI 格式的 messages 轉換為 Gemini 格式
-            prompt_parts = []
-            for msg in messages:
-                if msg['role'] == 'system':
-                    prompt_parts.append(f"System: {msg['content']}")
-                elif msg['role'] == 'user':
-                    prompt_parts.append(f"User: {msg['content']}")
-                elif msg['role'] == 'assistant':
-                    prompt_parts.append(f"Assistant: {msg['content']}")
-            
-            full_prompt = "\n".join(prompt_parts)
-            
-            response = self.model.generate_content(
-                full_prompt,
-                generation_config=genai.types.GenerationConfig(
-                    max_output_tokens=2000,
-                    temperature=0.7
-                ),
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_tokens=2000,
+                temperature=0.7,
                 stream=stream
             )
             
@@ -50,12 +42,13 @@ class GeminiClient:
                 # 處理 streaming 回應
                 full_response = ""
                 for chunk in response:
-                    if chunk.text:
-                        print(chunk.text, end='', flush=True)
-                        full_response += chunk.text
+                    if chunk.choices[0].delta.content:
+                        content = chunk.choices[0].delta.content
+                        print(content, end='', flush=True)
+                        full_response += content
                 return full_response
             else:
-                return response.text.strip()
+                return response.choices[0].message.content.strip()
                 
         except Exception as e:
             error_msg = f"Gemini API 呼叫失敗: {str(e)}"
