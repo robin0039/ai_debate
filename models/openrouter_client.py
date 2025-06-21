@@ -3,8 +3,7 @@ OpenRouter DeepSeek 客戶端
 代表立場：貓跟狗都很笨
 """
 
-import requests
-import json
+import openai
 import os
 import sys
 
@@ -13,7 +12,16 @@ class OpenRouterClient:
         self.api_key = api_key or os.getenv('OPENROUTER_API_KEY')
         self.stance = "貓跟狗都很笨"
         self.model = "deepseek/deepseek-chat-v3-0324:free"
-        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+        
+        # 初始化 OpenAI 客戶端，使用 OpenRouter 的 base URL
+        self.client = openai.OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=self.api_key,
+            default_headers={
+                "HTTP-Referer": "https://github.com/ai-debate-demo",
+                "X-Title": "AI Debate Demo"
+            }
+        )
         
     def get_system_prompt(self):
         """獲取系統提示詞"""
@@ -26,59 +34,25 @@ class OpenRouterClient:
     def get_response(self, messages, stream=False):
         """獲取 AI 回應"""
         try:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "HTTP-Referer": "https://github.com/ai-debate-demo",
-                "X-Title": "AI Debate Demo",
-                "Content-Type": "application/json"
-            }
-            
-            data = {
-                "model": self.model,
-                "messages": messages,
-                "max_tokens": 2000,
-                "temperature": 0.7,
-                "stream": stream
-            }
-            
-            response = requests.post(
-                self.base_url,
-                headers=headers,
-                json=data,
-                timeout=30,
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_tokens=2000,
+                temperature=0.7,
                 stream=stream
             )
             
-            if response.status_code == 200:
-                if stream:
-                    # 處理 streaming 回應 (SSE)
-                    full_response = ""
-                    for line in response.iter_lines():
-                        if line:
-                            line = line.decode('utf-8')
-                            if line.startswith('data: '):
-                                data_str = line[6:]  # 移除 'data: ' 前綴
-                                if data_str == '[DONE]':
-                                    break
-                                try:
-                                    data_json = json.loads(data_str)
-                                    if 'choices' in data_json and len(data_json['choices']) > 0:
-                                        delta = data_json['choices'][0].get('delta', {})
-                                        if 'content' in delta and delta['content']:
-                                            content = delta['content']
-                                            print(content, end='', flush=True)
-                                            full_response += content
-                                except json.JSONDecodeError:
-                                    continue
-                    return full_response
-                else:
-                    result = response.json()
-                    return result['choices'][0]['message']['content'].strip()
+            if stream:
+                # 處理 streaming 回應
+                full_response = ""
+                for chunk in response:
+                    if chunk.choices[0].delta.content:
+                        content = chunk.choices[0].delta.content
+                        print(content, end='', flush=True)
+                        full_response += content
+                return full_response
             else:
-                error_msg = f"OpenRouter API 呼叫失敗: HTTP {response.status_code}"
-                if stream:
-                    print(error_msg, end='', flush=True)
-                return error_msg
+                return response.choices[0].message.content.strip()
                 
         except Exception as e:
             error_msg = f"OpenRouter API 呼叫失敗: {str(e)}"
